@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>警笛テスト</title>
+</head>
+<body>
+  <h1>スペースキーで警笛を鳴らす / Enterで停止</h1>
+
+  <!-- 音声ファイル -->
+  <audio id="keiteki" src="keiteki.m4a"></audio>
+
+  <script>
+    const sound = document.getElementById("keiteki");
+
+    document.addEventListener("keydown", (e) => {
+      // スペースキーで再生
+      if (e.code === "Space") {
+        e.preventDefault(); // スクロール防止
+        sound.currentTime = 0;
+        sound.play();
+      }
+
+      // Enterキーで停止
+      if (e.code === "Enter") {
+        e.preventDefault();
+        sound.pause();
+        sound.currentTime = 0; // 頭に戻す
+      }
+    });
+  </script>
+</body>
+</html>
