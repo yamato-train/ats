@@ -2,30 +2,85 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>警笛テスト</title>
+  <title>警笛・後吾テスト</title>
 </head>
 <body>
-  <h1>スペースキーで警笛を鳴らす / Enterで停止</h1>
+  <h1>警笛 / 後吾 再生テスト</h1>
+  <p>
+    <strong>Space</strong>：keiteki.m4a を連続再生（ループ）<br>
+    <strong>Enter</strong>：keiteki.m4a を止めて kougo.m4a を再生<br>
+    <strong>A</strong>：すべての音声を停止
+  </p>
 
   <!-- 音声ファイル -->
   <audio id="keiteki" src="keiteki.m4a"></audio>
+  <audio id="kougo" src="kougo.m4a"></audio>
 
   <script>
-    const sound = document.getElementById("keiteki");
+    const keiteki = document.getElementById("keiteki");
+    const kougo = document.getElementById("kougo");
 
-    document.addEventListener("keydown", (e) => {
-      // スペースキーで再生
+    // 警笛はループさせておく（Space で再生開始）
+    keiteki.loop = true;
+
+    // キー押下の状態を管理（押しっぱなしで連打されないように）
+    const keyState = {
+      Space: false,
+      Enter: false,
+      KeyA: false
+    };
+
+    document.addEventListener("keydown", async (e) => {
+      // 同じキーが押しっぱなしなら無視
+      if (keyState[e.code]) return;
+      keyState[e.code] = true;
+
+      // Space：keiteki.m4a を連続再生
       if (e.code === "Space") {
-        e.preventDefault(); // スクロール防止
-        sound.currentTime = 0;
-        sound.play();
+        e.preventDefault();
+        try {
+          // 既に再生中なら何もしない
+          if (keiteki.paused) {
+            // 後吾が鳴ってたら止める
+            kougo.pause();
+            kougo.currentTime = 0;
+
+            await keiteki.play(); // ループ再生開始
+          }
+        } catch (err) {
+          console.error("再生エラー(Space):", err);
+        }
       }
 
-      // Enterキーで停止
+      // Enter：keiteki を止めて kougo 再生
       if (e.code === "Enter") {
         e.preventDefault();
-        sound.pause();
-        sound.currentTime = 0; // 頭に戻す
+        try {
+          // 警笛を止める
+          keiteki.pause();
+          keiteki.currentTime = 0;
+
+          // 後吾を頭から1回再生
+          kougo.currentTime = 0;
+          await kougo.play();
+        } catch (err) {
+          console.error("再生エラー(Enter):", err);
+        }
+      }
+
+      // A：すべて停止
+      if (e.code === "KeyA") {
+        e.preventDefault();
+        keiteki.pause();
+        keiteki.currentTime = 0;
+        kougo.pause();
+        kougo.currentTime = 0;
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (keyState[e.code]) {
+        keyState[e.code] = false;
       }
     });
   </script>
